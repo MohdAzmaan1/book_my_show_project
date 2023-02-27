@@ -1,7 +1,7 @@
 package com.example.Book_My_Show.Controller;
 
-import com.example.Book_My_Show.EntryDTOs.TheaterEntryDTO;
-import com.example.Book_My_Show.Service.TheaterService;
+import com.example.Book_My_Show.EntryDTOs.ShowEntryDTO;
+import com.example.Book_My_Show.Service.ShowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,21 +11,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/theater")
-public class TheaterController {
+@RequestMapping("/shows")
+public class ShowController {
 
     @Autowired
-    TheaterService theaterService;
+    ShowService showService;
 
     @PostMapping("/add")
-    public ResponseEntity<String> addTheater(@RequestBody TheaterEntryDTO theaterEntryDTO){
+    public ResponseEntity<String> addShow(@RequestBody ShowEntryDTO showEntryDTO){
         try{
-            String response = theaterService.addTheater(theaterEntryDTO);
+            String response = showService.addShow(showEntryDTO);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
 
-        }catch(Exception e){
-            String response = "Theater not created";
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }catch (Exception e){
+            String result = "Show not added";
+            return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
         }
     }
 }

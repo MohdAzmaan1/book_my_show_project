@@ -24,7 +24,7 @@ public class UserController {
             String response = userService.addUser(userEntryDTO);
             return new ResponseEntity<>(response, HttpStatus.CREATED);
         }catch (Exception e){
-            String result = "User can not be found";
+            String result = "User not added";
             return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
         }
     }

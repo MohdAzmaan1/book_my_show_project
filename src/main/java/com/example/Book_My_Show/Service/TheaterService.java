@@ -6,7 +6,7 @@ import com.example.Book_My_Show.Genres.SeatType;
 import com.example.Book_My_Show.Models.Theater;
 import com.example.Book_My_Show.Models.TheaterSeats;
 import com.example.Book_My_Show.Repository.TheaterSeatRepository;
-import com.example.Book_My_Show.Repository.TheatreRepository;
+import com.example.Book_My_Show.Repository.TheaterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +19,14 @@ public class TheaterService {
     @Autowired
     TheaterSeatRepository theaterSeatRepository;
 
-    public String addTheater(TheaterEntryDTO theaterEntryDTO){
+    @Autowired
+    TheaterRepository theaterRepository;
+
+    public String addTheater(TheaterEntryDTO theaterEntryDTO) throws Exception{
         Theater theater = TheaterConvertor.convertDtoToEntity(theaterEntryDTO);
         List<TheaterSeats> theaterSeatsList = createTheaterSeats(theaterEntryDTO, theater);
-
+        theater.setTheaterSeatsList(theaterSeatsList);
+        theaterRepository.save(theater);
         return "Theater added Successfully";
     }
 
@@ -51,9 +55,6 @@ public class TheaterService {
 
             theaterSeatEntityList.add(theaterSeat);
         }
-
-        theaterSeatRepository.saveAll(theaterSeatEntityList);
-
         return theaterSeatEntityList;
     }
 }
