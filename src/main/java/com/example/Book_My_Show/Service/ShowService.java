@@ -71,18 +71,18 @@ public class ShowService {
 
         Theater theater = show.getTheater();
 
-        List<TheaterSeats> theaterSeatEntityList = theater.getTheaterSeatsList();
+        List<TheaterSeats> theaterSeats = theater.getTheaterSeatsList();
 
         List<ShowSeat> seatList = new ArrayList<>();
 
-        for(TheaterSeats theaterSeats : theaterSeatEntityList){
+        for(TheaterSeats theaterSeats1 : theaterSeats){
 
             ShowSeat showSeat = new ShowSeat();
 
-            showSeat.setSeatNumber(Integer.parseInt(theaterSeats.getSeatNumber()));
-            showSeat.setSeatType(theaterSeats.getSeatType());
+            showSeat.setSeatNumber(theaterSeats1.getSeatNumber());
+            showSeat.setSeatType(theaterSeats1.getSeatType());
 
-            if(theaterSeats.getSeatType().equals(SeatType.CLASSIC))
+            if(theaterSeats1.getSeatType().equals(SeatType.CLASSIC))
                 showSeat.setPrice(showEntryDTO.getClassSeatPrice());
 
             else

@@ -25,5 +25,5 @@ public class TheaterSeats {
 
     @ManyToOne
     @JoinColumn
-    Theater theater;
+    private Theater theater;
 }

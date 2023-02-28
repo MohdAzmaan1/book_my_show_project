@@ -22,7 +22,7 @@ public class ShowSeat {
 
     private boolean isBooked;
 
-    private int seatNumber;
+    private String seatNumber;
 
     private Date bookedAt;
 
@@ -31,5 +31,5 @@ public class ShowSeat {
 
     @ManyToOne
     @JoinColumn
-    Show show;
+    private Show show;
 }

@@ -39,12 +39,12 @@ public class Show {
     //Child wrt Theater
     @ManyToOne
     @JoinColumn
-    Theater theater;
+    private Theater theater;
 
     //Child wrt to Movie
     @ManyToOne
     @JoinColumn
-    Movie movie;
+    private Movie movie;
 
     //Show is parent wrt tickets
     @OneToMany(mappedBy = "show", cascade = CascadeType.ALL)
