@@ -10,8 +10,11 @@ import com.example.Book_My_Show.Repository.ShowRepository;
 import com.example.Book_My_Show.Repository.TicketRepository;
 import com.example.Book_My_Show.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import javax.mail.internet.MimeMessage;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +30,11 @@ public class TicketService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    JavaMailSender javaMailSender;
+
     public String addTicket(TicketEntryDTO ticketEntryDTO) throws Exception{
+        //1. Create TicketEntity from entryDto : Convert DTO ---> Entity
         Ticket ticket = TicketConvertor.convertDtoToEntity(ticketEntryDTO);
 
         //Validation : Check if the requested seats are available or not ?
@@ -38,17 +45,17 @@ public class TicketService {
         }
 
         //Calculate the total amount :
-        Show showEntity = showRepository.findById(ticketEntryDTO.getShowId()).get();
-        List<ShowSeat> seatEntityList = showEntity.getListOfShowSeats();
+        Show show = showRepository.findById(ticketEntryDTO.getShowId()).get();
+        List<ShowSeat> seatList = show.getListOfShowSeats();
         List<String> requestedSeats = ticketEntryDTO.getRequestedSeats();
 
         int totalAmount = 0;
-        for(ShowSeat showSeatEntity:seatEntityList){
+        for(ShowSeat showSeat:seatList){
 
-            if(requestedSeats.contains(showSeatEntity.getSeatNumber())){
-                totalAmount = totalAmount + showSeatEntity.getPrice();
-                showSeatEntity.setBooked(true);
-                showSeatEntity.setBookedAt(new Date());
+            if(requestedSeats.contains(showSeat.getSeatNumber())){
+                totalAmount = totalAmount + showSeat.getPrice();
+                showSeat.setBooked(true);
+                showSeat.setBookedAt(new Date());
             }
         }
 
@@ -56,54 +63,65 @@ public class TicketService {
 
 
         //Setting the other attributes for the ticketEntity
-        ticket.setMovieName(showEntity.getMovie().getMovieName());
-        ticket.setShowDate(showEntity.getShowDate());
-        ticket.setShowTime(showEntity.getShowTime());
-        ticket.setTheaterName(showEntity.getTheater().getName());
+        ticket.setMovieName(show.getMovie().getMovieName());
+        ticket.setShowDate(show.getShowDate());
+        ticket.setShowTime(show.getShowTime());
+        ticket.setTheaterName(show.getTheater().getName());
 
 
         //We need to set that string that talked about requested Seats
-        String allotedSeats = getAllowedSeatsFromShowSeats(requestedSeats);
-        ticket.setBookedSeat(allotedSeats);
+        String allottedSeats = getAllowedSeatsFromShowSeats(requestedSeats);
+        ticket.setBookedSeat(allottedSeats);
 
 
         //Setting the foreign key attributes
-        User userEntity = userRepository.findById(ticketEntryDTO.getUserId()).get();
+        User user = userRepository.findById(ticketEntryDTO.getUserId()).get();
+        ticket.setUser(user);
+        ticket.setShow(show);
 
-        ticket.setUser(userEntity);
-        ticket.setShow(showEntity);
+        ticket = ticketRepository.save(ticket);
 
         //Save the parent
-
-        List<Ticket> ticketEntityList = showEntity.getListOfBookedTickets();
-        ticketEntityList.add(ticket);
-        showEntity.setListOfBookedTickets(ticketEntityList);
-
-        showRepository.save(showEntity);
+        List<Ticket> ticketList = show.getListOfBookedTickets();
+        ticketList.add(ticket);
+        show.setListOfBookedTickets(ticketList);
+        showRepository.save(show);
 
 
-        List<Ticket> ticketEntityList1 = userEntity.getBookedTickets();
-        ticketEntityList1.add(ticket);
-        userEntity.setBookedTickets(ticketEntityList1);
+        List<Ticket> ticketList1 = user.getBookedTickets();
+        ticketList1.add(ticket);
+        user.setBookedTickets(ticketList1);
+        userRepository.save(user);
 
-        userRepository.save(userEntity);
+
+        String body = "Your ticket is booked for seat Number " + allottedSeats +"for the movie : " + ticket.getMovieName();
 
 
-        return "Ticket has successfully been added";
+        MimeMessage mimeMessage=javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper=new MimeMessageHelper(mimeMessage,true);
+        mimeMessageHelper.setFrom("azmaan000@gmail.com");
+        mimeMessageHelper.setTo(user.getEmail());
+        mimeMessageHelper.setText(body);
+        mimeMessageHelper.setSubject("Confirming your booked Ticket");
 
+        javaMailSender.send(mimeMessage);
+
+        return "Ticket is successfully booked";
     }
 
     private String getAllowedSeatsFromShowSeats(List<String> requestedSeats){
 
         String result = "";
+        int count = 0;
 
-        for(String seat :requestedSeats){
-
-            result = result + seat +", ";
-
+        for(int i = 0; i < requestedSeats.size();i++){
+            if(i == requestedSeats.size() - 1){
+                result = result + requestedSeats.get(i) + " ";
+            }
+            else
+                result = result + requestedSeats.get(i) + ", ";
         }
         return result;
-
     }
 
 
@@ -113,9 +131,9 @@ public class TicketService {
 
         List<String> requestedSeats = ticketEntryDTO.getRequestedSeats();
 
-        Show showEntity = showRepository.findById(showId).get();
+        Show show = showRepository.findById(showId).get();
 
-        List<ShowSeat> listOfSeats = showEntity.getListOfShowSeats();
+        List<ShowSeat> listOfSeats = show.getListOfShowSeats();
 
         //Iterating over the list Of Seats for that particular show
         for(ShowSeat showSeat : listOfSeats){

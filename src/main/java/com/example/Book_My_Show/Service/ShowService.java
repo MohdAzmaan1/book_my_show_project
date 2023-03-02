@@ -5,6 +5,7 @@ import com.example.Book_My_Show.EntryDTOs.ShowEntryDTO;
 import com.example.Book_My_Show.Genres.SeatType;
 import com.example.Book_My_Show.Models.*;
 import com.example.Book_My_Show.Repository.MovieRepository;
+import com.example.Book_My_Show.Repository.ShowRepository;
 import com.example.Book_My_Show.Repository.TheaterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,8 @@ public class ShowService {
     @Autowired
     TheaterRepository theaterRepository;
 
+    @Autowired
+    ShowRepository showRepository;
 
     public String addShow(ShowEntryDTO showEntryDTO){
         // Create a showEntity
@@ -33,39 +36,34 @@ public class ShowService {
         Theater theater = theaterRepository.findById(theaterId).get();
 
 
-        //Setting the attribute of foreignKe
+        //Setting the attribute of foreign key
         show.setMovie(movie);
         show.setTheater(theater);
+        show.setShowDate(showEntryDTO.getLocalDate());
+        show.setShowTime(showEntryDTO.getLocalTime());
 
 
         //Pending attributes the listOfShowSeatsEntity
-
         List<ShowSeat> showSeatList = createShowSeatEntity(showEntryDTO,show);
-
         show.setListOfShowSeats(showSeatList);
 
+        show = showRepository.save(show);
 
         //Now we  also need to update the parent entities
-
         List<Show> showList = movie.getShowList();
         showList.add(show);
         movie.setShowList(showList);
-
         movieRepository.save(movie);
 
         List<Show> showList1 = theater.getShowList();
         showList1.add(show);
         theater.setShowList(showList1);
-
         theaterRepository.save(theater);
 
         return "The show has been added successfully";
     }
 
     private List<ShowSeat> createShowSeatEntity(ShowEntryDTO showEntryDTO, Show show){
-
-
-
         //Now the goal is to create the ShowSeatEntity
         //We need to set its attribute
 
