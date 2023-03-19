@@ -65,6 +65,9 @@
 
 	• Book Tickets
       ○ Send email notification to the user
+      
+    • Cancel Tickets
+      ○ Send email notification to the user
 
 
 
@@ -137,6 +140,16 @@
       "showId": int,
       "requestedSeats": ["String", "String", "..."],
       "userId": int
+	}
+
+
+###### To Cancel Ticket:	
+
+	localhost:8080/tickets/cancel-ticket
+  
+    {
+      "ticketId" : int,
+      "deleteTicketList":["String", "String", "..."]
 	}
 	
 
