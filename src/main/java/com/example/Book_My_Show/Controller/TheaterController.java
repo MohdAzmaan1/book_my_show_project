@@ -24,7 +24,7 @@ public class TheaterController {
             return new ResponseEntity<>(response, HttpStatus.CREATED);
 
         }catch(Exception e){
-            String response = "Theater not created";
+            String response = "Theater is not created";
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
     }

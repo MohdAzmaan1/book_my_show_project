@@ -1,14 +1,12 @@
 package com.example.Book_My_Show.Controller;
 
+import com.example.Book_My_Show.EntryDTOs.DeleteTicketEntryDTO;
 import com.example.Book_My_Show.EntryDTOs.TicketEntryDTO;
 import com.example.Book_My_Show.Service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/tickets")
@@ -24,9 +22,17 @@ public class TicketController {
             return new ResponseEntity<>(response, HttpStatus.CREATED);
 
         }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 
-            String response = "Ticket is not booked";
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    @DeleteMapping("/cancel-ticket")
+    public ResponseEntity<String> cancelTicket(@RequestBody DeleteTicketEntryDTO deleteTicketEntryDto) {
+        try{
+            String response = ticketService.cancelTicket(deleteTicketEntryDto);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -24,7 +24,7 @@ public class ShowController {
             return new ResponseEntity<>(response, HttpStatus.CREATED);
 
         }catch (Exception e){
-            String result = "Show not added";
+            String result = "Show is not added";
             return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
         }
     }

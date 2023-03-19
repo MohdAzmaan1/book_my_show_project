@@ -23,7 +23,7 @@ public class MovieController {
             String response = movieService.addMovie(movieEntryDTO);
             return new ResponseEntity<>(response, HttpStatus.FOUND);
         }catch (Exception e){
-            String response = "Movie not added";
+            String response = "Movie is not added";
             return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
         }
     }
