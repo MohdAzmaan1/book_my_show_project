@@ -45,11 +45,12 @@ public class TicketService {
             throw new Exception("Requested seats are not available");
         }
 
-        //Calculate the total amount :
+
         Show show = showRepository.findById(ticketEntryDTO.getShowId()).get();
         List<ShowSeat> seatList = show.getListOfShowSeats();
         List<String> requestedSeats = ticketEntryDTO.getRequestedSeats();
 
+        //Calculate the total amount :
         int totalAmount = 0;
         for(ShowSeat showSeat:seatList){
 
@@ -60,10 +61,8 @@ public class TicketService {
             }
         }
 
-        ticket.setTotalAmount(totalAmount);
-
-
         //Setting the other attributes for the ticketEntity
+        ticket.setTotalAmount(totalAmount);
         ticket.setMovieName(show.getMovie().getMovieName());
         ticket.setShowDate(show.getShowDate());
         ticket.setShowTime(show.getShowTime());
@@ -113,8 +112,6 @@ public class TicketService {
     private String getAllowedSeatsFromShowSeats(List<String> requestedSeats){
 
         String result = "";
-        int count = 0;
-
         for(int i = 0; i < requestedSeats.size();i++){
             if(i == requestedSeats.size() - 1){
                 result = result + requestedSeats.get(i);
