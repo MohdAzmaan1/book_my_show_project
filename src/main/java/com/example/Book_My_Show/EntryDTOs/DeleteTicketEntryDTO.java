@@ -7,5 +7,4 @@ import java.util.List;
 @Data
 public class DeleteTicketEntryDTO {
     private int ticketId;
-    private List<String> deleteTicketList;
 }

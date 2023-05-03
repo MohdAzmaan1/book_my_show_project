@@ -151,46 +151,32 @@ public class TicketService {
 
     public String cancelTicket(DeleteTicketEntryDTO deleteTicketEntryDTO)throws Exception {
         Ticket ticket = ticketRepository.findById(deleteTicketEntryDTO.getTicketId()).get();
-        List<ShowSeat> showSeatEntityList = ticket.getShow().getListOfShowSeats();
-        List<String> ticketsToBeDeleted = deleteTicketEntryDTO.getDeleteTicketList();
+        String ticketsToBeDeleted = ticket.getBookedSeat();
+        String cancelledSeats = "";
 
-        String [] currTickets = ticket.getBookedSeat().split(",");
+        String [] currSeats = ticketsToBeDeleted.split(",");
 
-        int count = 0;
-        for(String ticketName : currTickets)
-            if(ticketsToBeDeleted.contains(ticketName))
-                count ++;
+        Show show = ticket.getShow();
+        List<ShowSeat> showSeatList = show.getListOfShowSeats();
 
-        if(count != ticketsToBeDeleted.size())
-            throw new Exception("Invalid data found !");
+        int totalAmount = ticket.getTotalAmount();
+        cancelBookingOfSeats(currSeats,showSeatList);
 
-        Set<String> deletedTicketSet = new HashSet<>();
-        for(ShowSeat seat : showSeatEntityList) {
-            if(ticketsToBeDeleted.contains(seat.getSeatNumber())) {
-                seat.setBooked(false);
-                deletedTicketSet.add(seat.getSeatNumber());
-            }
+        for(int i = 0; i < currSeats.length; i++){
+            if(i == currSeats.length - 1)
+                cancelledSeats += currSeats[i];
+            else
+                cancelledSeats += currSeats[i] +",";
         }
 
-        StringBuilder newBookedTickets = new StringBuilder();
-        for(String tick : currTickets) {
-            if(!deletedTicketSet.contains(tick)) {
-                if(newBookedTickets.length() > 0) newBookedTickets.append(',');
-                newBookedTickets.append(tick);
-            }
-        }
-
-        Iterator it = deletedTicketSet.iterator();
-        StringBuilder ticket1 = new StringBuilder();
-        while(it.hasNext()) {
-            ticket1.append(it.next());
-        }
-
-        int toBeDeleted = deletedTicketSet.size() * 200;
-        ticket.setTotalAmount(ticket.getTotalAmount() - toBeDeleted);
+        showRepository.save(show);
 
         User user = ticket.getUser();
-        String body = "Hi,  "+user.getName()+"\n\nThis is to confirm your booking cancellation."+"\nTicket id - "+ticket.getTicketId()+"\nCancelled Seats - "+ticket1+"\nAmount of rupees - "+toBeDeleted+" will be refunded in to your account in 6-7 working days\n\n\n"+"Have a wonderful day !";
+        String body = "Hi,  "+user.getName()+"\n\nThis is to confirm your booking cancellation."+"" +
+                "\nTicket id - "+ticket.getTicketId()+"\nCancelled Seats - "+cancelledSeats+"\n" +
+                "Amount of rupees - "+totalAmount+" will be refunded in to your account in 6-7 working days" +
+                "\n\n\n"+"Have a wonderful day !";
+
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper=new MimeMessageHelper(mimeMessage,true);
@@ -198,19 +184,19 @@ public class TicketService {
         mimeMessageHelper.setTo(user.getEmail());
         mimeMessageHelper.setText(body);
         mimeMessageHelper.setSubject("Confirmation for your ticket cancellation");
-
         javaMailSender.send(mimeMessage);
 
 
-        if(newBookedTickets.length() == 0)  {
-            ticketRepository.delete(ticket);
-            userRepository.save(user);
-            return ("Tickets has been successfully cancelled !");
-        }
-
-        ticket.setBookedSeat(newBookedTickets.toString());
-        userRepository.save(ticket.getUser());
-
         return ("Tickets has been successfully cancelled !");
+    }
+
+    private void cancelBookingOfSeats(String [] currSeats, List<ShowSeat> showSeatList) {
+        for(ShowSeat showSeat : showSeatList){
+            String seatNo = showSeat.getSeatNumber();
+            if(Arrays.asList(currSeats).contains(seatNo)){
+                showSeat.setBookedAt(null);
+                showSeat.setBooked(false);
+            }
+        }
     }
 }
