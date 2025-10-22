@@ -3,13 +3,11 @@ spring:
     url: jdbc:mysql://sql12.freesqldatabase.com:3306/sql12804047?createTableIfNotExists=true
     username: sql12804047
     password: jhB2kcKm5E
-    data:
-      redis:
-        host: redis-19994.crce206.ap-south-1-1.ec2.redns.redis-cloud.com
-        port: 19994
-        password: 8FTaFPkvKAAr4nBF7b1SrEsP2b0GNoFp
-        ssl:
-          enabled: true
+  data:
+    redis:
+      host: redis-19994.crce206.ap-south-1-1.ec2.redns.redis-cloud.com
+      port: 19994
+      password: 8FTaFPkvKAAr4nBF7b1SrEsP2b0GNoFp
   jpa:
     hibernate:
       ddl-auto: update
